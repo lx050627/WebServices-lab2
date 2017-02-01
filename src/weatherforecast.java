@@ -1,4 +1,3 @@
-import javax.xml.crypto.Data;
 import javax.xml.parsers.DocumentBuilder; 
 import javax.xml.parsers.DocumentBuilderFactory; 
 import org.w3c.dom.Document; 
@@ -6,6 +5,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node; 
 import org.w3c.dom.NodeList;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -26,7 +29,8 @@ public class weatherforecast
 		 String url="http://api.met.no/weatherapi/locationforecast/1.9/?lat="
 		 +lat+"&lon="+lon;
 //		 System.out.println(url);
-		 
+		 if(checkResponCode(url))
+		 {
 		 try {
 			 DocumentBuilderFactory factory =
 		     DocumentBuilderFactory.newInstance();
@@ -80,8 +84,12 @@ public class weatherforecast
 	            System.out.println();
 	         } 
 			} catch (Exception e) {
-			// TODO: handle exception
+			System.out.println(e.getMessage());
 		}
+		 }
+		 else{
+			 System.out.println("The lattitude should be within (-90,90],and the longtitude should be within (-180,180).");
+		 }
 	
 	}
 	 
@@ -100,7 +108,7 @@ public class weatherforecast
 		 } 	 
 		 return cal;	 
 	 }
-	 
+ 
 	 private static void printCalendar(Calendar cal)
 	 {
 		 Date date=cal.getTime();  
@@ -116,6 +124,26 @@ public class weatherforecast
 			 b=true;
 		 }
 		 return b;
+	 }
+	 
+	 private static boolean checkResponCode(String url)
+	 {
+		 boolean success=true;
+		 try {
+			URL u = new URL(url);
+			HttpURLConnection uConnection = (HttpURLConnection) u.openConnection();  
+			 uConnection.connect();  
+			 String code=uConnection.getResponseCode()+" ";
+			 if(code.startsWith("4"))
+			 {
+				 success=false;;  
+			 }
+		 } catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+		    e.printStackTrace();
+		}  
+		 return success;	 
 	 }
 	 
 }
